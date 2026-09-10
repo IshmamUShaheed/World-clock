@@ -168,6 +168,11 @@ function render(updateInput = true) {
 }
 
 function renderAdditionalCities() {
+  if (state.additionalCities.length === 0) {
+    el.citiesList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px 20px; color: var(--muted); font-size: 0.9rem;">No additional cities yet. Click "+ Add City" to add one.</div>';
+    return;
+  }
+  
   el.citiesList.innerHTML = state.additionalCities.map((item, index) => {
     const data = formatZone(state.instant, item);
     const anchor = ZONES.find(z => z.id === state.anchorId);
@@ -351,8 +356,25 @@ el.citySearch.addEventListener("input", (e) => {
 });
 
 el.cityAddConfirm.addEventListener("click", () => {
-  const zone = el.citySearch.value || el.citySelect.value;
-  const selected = TIMEZONE_DATABASE.find(item => item.zone === zone || item.city === el.citySearch.value.split(",")[0]?.trim());
+  let selected = null;
+  
+  // Try to find by search value first
+  if (el.citySearch.value) {
+    const searchTerm = el.citySearch.value.trim();
+    selected = TIMEZONE_DATABASE.find(item => 
+      `${item.city}, ${item.country}`.toLowerCase() === searchTerm.toLowerCase()
+    );
+    if (!selected) {
+      selected = TIMEZONE_DATABASE.find(item => 
+        item.city.toLowerCase() === searchTerm.split(",")[0]?.toLowerCase()
+      );
+    }
+  }
+  
+  // Fall back to dropdown if not found
+  if (!selected && el.citySelect.value) {
+    selected = TIMEZONE_DATABASE.find(item => item.zone === el.citySelect.value);
+  }
   
   if (selected && !state.additionalCities.find(c => c.zone === selected.zone)) {
     state.additionalCities.push(selected);
@@ -362,6 +384,10 @@ el.cityAddConfirm.addEventListener("click", () => {
     el.citySuggestions.classList.remove("active");
     el.addCityDialog.close();
     showToast(`Added ${selected.city}!`);
+  } else if (state.additionalCities.find(c => c.zone === selected?.zone)) {
+    showToast(`${selected.city} is already added!`);
+  } else {
+    showToast("Please select a valid city");
   }
 });
 
