@@ -106,7 +106,7 @@ function zonedLocalToDate(value, timeZone) {
 }
 
 function formatZone(date, item) {
-  const time = new Intl.DateTimeFormat("en-GB", { timeZone: item.zone, hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
+  const time = new Intl.DateTimeFormat("en-GB", { timeZone: item.zone, hour: "2-digit", minute: "2-digit", hour12: true }).format(date);
   const dateText = new Intl.DateTimeFormat("en-GB", { timeZone: item.zone, weekday: "short", day: "numeric", month: "short", year: "numeric" }).format(date);
   const hour = Number(partsInZone(date, item.zone).hour);
   const offset = new Intl.DateTimeFormat("en-GB", { timeZone: item.zone, timeZoneName: "shortOffset" }).formatToParts(date).find(p => p.type === "timeZoneName")?.value || "UTC";
@@ -248,8 +248,8 @@ async function makeSnapshot() {
     ctx.font = "500 18px system-ui, sans-serif";
     ctx.fillText(z.country, x + 34, y + 80);
     ctx.fillStyle = "#f5f7fb";
-    ctx.font = "700 74px system-ui, sans-serif";
-    ctx.fillText(d.time, x + 32, y + 164);
+    ctx.font = "700 60px system-ui, sans-serif";
+    ctx.fillText(d.time, x + 32, y + 160);
     ctx.fillStyle = "#9ba8bd";
     ctx.font = "600 19px system-ui, sans-serif";
     ctx.fillText(`${d.dateText}  ·  ${d.offset}`, x + 36, y + 210);
