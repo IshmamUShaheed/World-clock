@@ -1,6 +1,6 @@
-# Time Bridge
+# World-clock (Time Bridge)
 
-A standalone web app for comparing Stockholm, Ottawa, Dhaka and Kuala Lumpur. Anyone with the public link can choose a city and local date/time, see the equivalent moment in all four places, and generate a PNG to share in a Messenger group.
+A standalone web app for comparing time across Stockholm, Ottawa, Dhaka, and Kuala Lumpur. Anyone with the public link can choose a city and local date/time, see the equivalent moment in all four places, and generate a PNG to share in a Messenger group.
 
 No Meta bot, account connection, database, or API key is required.
 
@@ -54,7 +54,7 @@ For Cloudflare Pages or Vercel, import the repository, use no build command, and
 
 - Find and highlight overlapping working hours automatically.
 - Allow people to add, remove, and reorder cities.
-- Save named moments such as “Friday family call.”
+- Save named moments such as "Friday family call."
 - Generate `.ics` calendar invitations.
 - Add meeting voting with two or three candidate times.
 - Add Bengali, Swedish, French, and Malay translations.
