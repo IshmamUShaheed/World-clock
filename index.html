@@ -50,7 +50,7 @@
         <div class="slider-group">
           <label for="hours-slider">
             <span class="slider-label">Hours</span>
-            <input id="hours-slider" type="range" min="0" max="23" value="12" aria-label="Hours" />
+            <input id="hours-slider" type="range" min="1" max="12" value="12" aria-label="Hours (12-hour format)" />
             <span id="hours-display" class="slider-value">12</span>
           </label>
         </div>
@@ -60,6 +60,10 @@
             <input id="minutes-slider" type="range" min="0" max="59" step="5" value="00" aria-label="Minutes" />
             <span id="minutes-display" class="slider-value">00</span>
           </label>
+        </div>
+        <div class="am-pm-toggle">
+          <button class="am-pm-btn am-btn active" id="am-btn" type="button">AM</button>
+          <button class="am-pm-btn pm-btn" id="pm-btn" type="button">PM</button>
         </div>
       </div>
 

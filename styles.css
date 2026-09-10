@@ -97,11 +97,16 @@ h1 em { color: transparent; -webkit-text-stroke: 1.5px rgba(245,247,251,.64); fo
 .field input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .65; cursor: pointer; }
 .divider { background: var(--line); margin: 5px 0; }
 
-.time-sliders { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 12px 18px; border-top: 1px solid var(--line); }
+.time-sliders { display: grid; grid-template-columns: repeat(2, 1fr) auto; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--line); align-items: end; }
 .slider-group { display: flex; flex-direction: column; gap: 8px; }
 .slider-group label { display: flex; flex-direction: column; gap: 8px; }
 .slider-label { font-size: .6rem; color: #7d8aa2; font-weight: 900; letter-spacing: .17em; }
 .slider-value { text-align: center; font-size: .85rem; font-weight: 700; color: var(--ink); min-width: 30px; }
+
+.am-pm-toggle { display: flex; gap: 6px; padding: 6px; background: rgba(255,255,255,.05); border-radius: 10px; border: 1px solid var(--line); }
+.am-pm-btn { padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--muted); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; min-width: 38px; }
+.am-pm-btn.active { background: var(--lime); color: #101707; border-color: var(--lime); box-shadow: 0 0 12px rgba(200,243,91,.4); }
+.am-pm-btn:hover:not(.active) { border-color: var(--lime); color: var(--lime); }
 
 .time-sliders input[type="range"] {
   appearance: none;

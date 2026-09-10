@@ -13,7 +13,8 @@ const state = {
   snapshotBlob: null,
   snapshotUrl: null,
   additionalCities: [],
-  favoriteCities: []
+  favoriteCities: [],
+  isPM: false
 };
 
 const el = {
@@ -54,7 +55,9 @@ const el = {
   digitalTime: document.querySelector("#digital-time"),
   digitalPeriod: document.querySelector("#digital-period"),
   userTimezone: document.querySelector("#user-timezone"),
-  userLocation: document.querySelector("#user-location")
+  userLocation: document.querySelector("#user-location"),
+  amBtn: document.querySelector("#am-btn"),
+  pmBtn: document.querySelector("#pm-btn")
 };
 
 // Theme Management
@@ -166,12 +169,27 @@ function render(updateInput = true) {
   // Update sliders
   if (document.activeElement !== el.hoursSlider && document.activeElement !== el.minutesSlider) {
     const p = partsInZone(state.instant, anchor.zone);
-    const hour = Number(p.hour);
+    let hour = Number(p.hour);
     const minute = Number(p.minute);
-    el.hoursSlider.value = hour;
-    el.hoursDisplay.textContent = String(hour).padStart(2, "0");
+    
+    // Convert 24-hour to 12-hour and determine AM/PM
+    state.isPM = hour >= 12;
+    let hour12 = hour % 12;
+    if (hour12 === 0) hour12 = 12;
+    
+    el.hoursSlider.value = hour12;
+    el.hoursDisplay.textContent = String(hour12).padStart(2, "0");
     el.minutesSlider.value = Math.floor(minute / 5) * 5;
     el.minutesDisplay.textContent = String(Math.floor(minute / 5) * 5).padStart(2, "0");
+    
+    // Update AM/PM toggle
+    if (state.isPM) {
+      el.pmBtn.classList.add("active");
+      el.amBtn.classList.remove("active");
+    } else {
+      el.amBtn.classList.add("active");
+      el.pmBtn.classList.remove("active");
+    }
   }
   
   const workingStatus = checkWorkingHours(state.instant);
@@ -618,7 +636,7 @@ el.input.addEventListener("change", () => {
 });
 
 el.hoursSlider.addEventListener("input", () => {
-  const h = parseInt(el.hoursSlider.value, 10);
+  let h = parseInt(el.hoursSlider.value, 10);
   el.hoursDisplay.textContent = String(h).padStart(2, "0");
   updateTimeFromSliders();
 });
@@ -629,10 +647,32 @@ el.minutesSlider.addEventListener("input", () => {
   updateTimeFromSliders();
 });
 
+el.amBtn.addEventListener("click", () => {
+  state.isPM = false;
+  el.amBtn.classList.add("active");
+  el.pmBtn.classList.remove("active");
+  updateTimeFromSliders();
+});
+
+el.pmBtn.addEventListener("click", () => {
+  state.isPM = true;
+  el.pmBtn.classList.add("active");
+  el.amBtn.classList.remove("active");
+  updateTimeFromSliders();
+});
+
 function updateTimeFromSliders() {
   const zone = ZONES.find(z => z.id === state.anchorId);
-  const h = parseInt(el.hoursSlider.value, 10);
+  let h = parseInt(el.hoursSlider.value, 10);
   const m = parseInt(el.minutesSlider.value, 10);
+  
+  // Convert 12-hour to 24-hour format
+  if (state.isPM) {
+    if (h !== 12) h += 12;
+  } else {
+    if (h === 12) h = 0;
+  }
+  
   const p = partsInZone(state.instant, zone.zone);
   const newValue = `${p.year}-${p.month}-${p.day}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   setPlanned(zonedLocalToDate(newValue, zone.zone));
