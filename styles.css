@@ -180,12 +180,14 @@ h1 em { color: transparent; -webkit-text-stroke: 1.5px rgba(245,247,251,.64); fo
 .city-card-tz { display: block; font-size: 0.75rem; color: var(--muted); }
 
 .add-city-form { display: flex; flex-direction: column; gap: 14px; margin: 18px 0; }
-.city-search-input, .city-select-dropdown { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.05); color: var(--ink); font-size: 0.95rem; outline: 0; transition: all 0.2s; }
-.city-search-input:focus, .city-select-dropdown:focus { border-color: var(--lime); background: rgba(200,243,91,.08); }
-.city-suggestions { max-height: 200px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.03); display: none; }
+.city-search-input, .city-select-dropdown { padding: 12px 14px; border: 2px solid var(--lime); border-radius: 10px; background: #ffffff; color: #1a1a1a; font-size: 0.95rem; outline: 0; transition: all 0.2s; font-weight: 500; }
+.city-search-input::placeholder { color: #999; }
+.city-search-input:focus, .city-select-dropdown:focus { border-color: var(--lime); background: #ffffff; box-shadow: 0 0 0 3px rgba(200,243,91,.15); }
+.city-select-dropdown option { background: #ffffff; color: #1a1a1a; padding: 10px; }
+.city-suggestions { max-height: 200px; overflow-y: auto; border: 2px solid var(--lime); border-radius: 10px; background: #ffffff; display: none; }
 .city-suggestions.active { display: block; }
-.city-suggestion-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--line); transition: background 0.15s; }
-.city-suggestion-item:hover { background: rgba(200,243,91,.1); }
+.city-suggestion-item { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #efefef; color: #1a1a1a; font-weight: 500; transition: background 0.15s; }
+.city-suggestion-item:hover { background: rgba(200,243,91,.15); }
 .city-suggestion-item:last-child { border-bottom: 0; }
 
 .share-bar { margin-top: 18px; min-height: 126px; border: 1px solid var(--line); border-radius: 19px; padding: 26px 28px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(105deg, rgba(255,255,255,.035), rgba(255,255,255,.012)); }
