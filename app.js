@@ -10,6 +10,10 @@ const state = { anchorId: "stockholm", instant: new Date(), live: true, snapshot
 const el = {
   anchor: document.querySelector("#anchor-select"),
   input: document.querySelector("#time-input"),
+  hoursSlider: document.querySelector("#hours-slider"),
+  minutesSlider: document.querySelector("#minutes-slider"),
+  hoursDisplay: document.querySelector("#hours-display"),
+  minutesDisplay: document.querySelector("#minutes-display"),
   grid: document.querySelector("#clock-grid"),
   now: document.querySelector("#now-button"),
   minus: document.querySelector("#minus-hour"),
@@ -84,6 +88,18 @@ function workLabel(hour) {
 function render(updateInput = true) {
   const anchor = ZONES.find(z => z.id === state.anchorId);
   if (updateInput && document.activeElement !== el.input) el.input.value = localInputValue(state.instant, anchor.zone);
+  
+  // Update sliders
+  if (document.activeElement !== el.hoursSlider && document.activeElement !== el.minutesSlider) {
+    const p = partsInZone(state.instant, anchor.zone);
+    const hour = Number(p.hour);
+    const minute = Number(p.minute);
+    el.hoursSlider.value = hour;
+    el.hoursDisplay.textContent = String(hour).padStart(2, "0");
+    el.minutesSlider.value = Math.floor(minute / 5) * 5;
+    el.minutesDisplay.textContent = String(Math.floor(minute / 5) * 5).padStart(2, "0");
+  }
+  
   el.anchor.value = state.anchorId;
   el.livePill.classList.toggle("planned", !state.live);
   el.modeLabel.textContent = state.live ? "Live now" : "Planning mode";
@@ -257,6 +273,28 @@ el.input.addEventListener("change", () => {
   const zone = ZONES.find(z => z.id === state.anchorId);
   setPlanned(zonedLocalToDate(el.input.value, zone.zone));
 });
+
+el.hoursSlider.addEventListener("input", () => {
+  const h = parseInt(el.hoursSlider.value, 10);
+  el.hoursDisplay.textContent = String(h).padStart(2, "0");
+  updateTimeFromSliders();
+});
+
+el.minutesSlider.addEventListener("input", () => {
+  const m = parseInt(el.minutesSlider.value, 10);
+  el.minutesDisplay.textContent = String(m).padStart(2, "0");
+  updateTimeFromSliders();
+});
+
+function updateTimeFromSliders() {
+  const zone = ZONES.find(z => z.id === state.anchorId);
+  const h = parseInt(el.hoursSlider.value, 10);
+  const m = parseInt(el.minutesSlider.value, 10);
+  const p = partsInZone(state.instant, zone.zone);
+  const newValue = `${p.year}-${p.month}-${p.day}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  setPlanned(zonedLocalToDate(newValue, zone.zone));
+}
+
 el.grid.addEventListener("click", event => {
   const card = event.target.closest(".clock-card");
   if (!card) return;

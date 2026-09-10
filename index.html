@@ -40,6 +40,24 @@
         <span>LOCAL DATE &amp; TIME</span>
         <input id="time-input" type="datetime-local" step="60" aria-label="Local date and time" />
       </label>
+      
+      <div class="time-sliders" aria-label="Time picker controls">
+        <div class="slider-group">
+          <label for="hours-slider">
+            <span class="slider-label">Hours</span>
+            <input id="hours-slider" type="range" min="0" max="23" value="12" aria-label="Hours" />
+            <span id="hours-display" class="slider-value">12</span>
+          </label>
+        </div>
+        <div class="slider-group">
+          <label for="minutes-slider">
+            <span class="slider-label">Minutes</span>
+            <input id="minutes-slider" type="range" min="0" max="59" step="5" value="00" aria-label="Minutes" />
+            <span id="minutes-display" class="slider-value">00</span>
+          </label>
+        </div>
+      </div>
+
       <div class="quick-actions" aria-label="Quick time controls">
         <button class="quiet-button" id="minus-hour" type="button" title="One hour earlier">−1h</button>
         <button class="now-button" id="now-button" type="button"><span>●</span> Now</button>
