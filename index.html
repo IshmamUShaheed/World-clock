@@ -85,6 +85,22 @@
       <p>Tap any city to make it the starting point</p>
     </div>
 
+    <section class="live-clock-widget">
+      <div class="live-clock-container">
+        <div class="live-clock-content">
+          <div class="analog-clock-wrapper">
+            <canvas id="analog-clock" width="200" height="200"></canvas>
+          </div>
+          <div class="digital-clock-wrapper">
+            <div class="digital-time" id="digital-time">00:00</div>
+            <div class="digital-period" id="digital-period">AM</div>
+            <div class="user-timezone" id="user-timezone">Loading...</div>
+            <div class="user-location" id="user-location">Your Time</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="clock-grid" id="clock-grid" aria-live="polite"></section>
 
     <section class="share-bar">
@@ -137,7 +153,7 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="timezones.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="timezones.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

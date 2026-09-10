@@ -49,7 +49,12 @@ const el = {
   citySuggestions: document.querySelector("#city-suggestions"),
   cityAddConfirm: document.querySelector("#city-add-confirm"),
   cityCancel: document.querySelector("#city-cancel"),
-  citiesList: document.querySelector("#cities-list")
+  citiesList: document.querySelector("#cities-list"),
+  analogClock: document.querySelector("#analog-clock"),
+  digitalTime: document.querySelector("#digital-time"),
+  digitalPeriod: document.querySelector("#digital-period"),
+  userTimezone: document.querySelector("#user-timezone"),
+  userLocation: document.querySelector("#user-location")
 };
 
 // Theme Management
@@ -491,7 +496,112 @@ function loadFavoriteCities() {
   }
 }
 
-// Initialize
+function getUserTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch (e) {
+    return "Unknown";
+  }
+}
+
+function drawAnalogClock() {
+  const canvas = el.analogClock;
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext("2d");
+  const radius = canvas.width / 2;
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw circle
+  ctx.fillStyle = "rgba(200, 243, 91, 0.1)";
+  ctx.beginPath();
+  ctx.arc(radius, radius, radius - 4, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.strokeStyle = "rgba(200, 243, 91, 0.3)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(radius, radius, radius - 4, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  // Draw numbers
+  ctx.fillStyle = "rgba(245, 247, 251, 0.7)";
+  ctx.font = "bold 14px system-ui";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  for (let i = 1; i <= 12; i++) {
+    const ang = i * Math.PI / 6;
+    const x = radius + Math.sin(ang) * (radius - 28);
+    const y = radius - Math.cos(ang) * (radius - 28);
+    ctx.fillText(i.toString(), x, y);
+  }
+  
+  // Draw hour hand
+  ctx.strokeStyle = "#c8f35b";
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  const hourAngle = (hours % 12) * Math.PI / 6 + minutes * Math.PI / (6 * 60);
+  ctx.moveTo(radius, radius);
+  ctx.lineTo(radius + Math.sin(hourAngle) * (radius - 60), radius - Math.cos(hourAngle) * (radius - 60));
+  ctx.stroke();
+  
+  // Draw minute hand
+  ctx.strokeStyle = "#6ba8ff";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  const minuteAngle = minutes * Math.PI / 30 + seconds * Math.PI / (30 * 60);
+  ctx.moveTo(radius, radius);
+  ctx.lineTo(radius + Math.sin(minuteAngle) * (radius - 40), radius - Math.cos(minuteAngle) * (radius - 40));
+  ctx.stroke();
+  
+  // Draw second hand
+  ctx.strokeStyle = "#ff725e";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const secondAngle = seconds * Math.PI / 30;
+  ctx.moveTo(radius, radius);
+  ctx.lineTo(radius + Math.sin(secondAngle) * (radius - 35), radius - Math.cos(secondAngle) * (radius - 35));
+  ctx.stroke();
+  
+  // Draw center dot
+  ctx.fillStyle = "#c8f35b";
+  ctx.beginPath();
+  ctx.arc(radius, radius, 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function updateLiveClock() {
+  const now = new Date();
+  
+  // Format time
+  const hours12 = now.getHours() % 12 || 12;
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const period = now.getHours() >= 12 ? "PM" : "AM";
+  
+  el.digitalTime.textContent = `${String(hours12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  el.digitalPeriod.textContent = period;
+  
+  // Update timezone info
+  const tz = getUserTimezone();
+  el.userTimezone.textContent = tz;
+  
+  // Draw analog clock
+  drawAnalogClock();
+}
+
+// Start live clock updates
+if (el.analogClock) {
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
+}
 initTheme();
 ZONES.forEach(z => el.anchor.add(new Option(`${z.city}, ${z.country}`, z.id)));
 populateCityDropdown();
