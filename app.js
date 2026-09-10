@@ -427,6 +427,7 @@ populateCityDropdown();
 loadStateFromUrl();
 loadAdditionalCities();
 render();
+renderAdditionalCities();  // Ensure cities render on load
 
 el.anchor.addEventListener("change", () => { state.anchorId = el.anchor.value; render(); });
 el.input.addEventListener("change", () => {
