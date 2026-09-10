@@ -1,3 +1,4 @@
+// Main 4 cities (always displayed)
 const ZONES = [
   { id: "stockholm", city: "Stockholm", country: "Sweden", zone: "Europe/Stockholm", accent: "#c8f35b" },
   { id: "ottawa", city: "Ottawa", country: "Canada", zone: "America/Toronto", accent: "#ff725e" },
@@ -5,7 +6,14 @@ const ZONES = [
   { id: "kuala-lumpur", city: "Kuala Lumpur", country: "Malaysia", zone: "Asia/Kuala_Lumpur", accent: "#5ce0c2" }
 ];
 
-const state = { anchorId: "stockholm", instant: new Date(), live: true, snapshotBlob: null, snapshotUrl: null };
+const state = {
+  anchorId: "stockholm",
+  instant: new Date(),
+  live: true,
+  snapshotBlob: null,
+  snapshotUrl: null,
+  additionalCities: []
+};
 
 const el = {
   anchor: document.querySelector("#anchor-select"),
@@ -29,9 +37,47 @@ const el = {
   livePill: document.querySelector("#live-pill"),
   modeLabel: document.querySelector("#mode-label"),
   summary: document.querySelector("#moment-summary"),
-  toast: document.querySelector("#toast")
+  toast: document.querySelector("#toast"),
+  themeToggle: document.querySelector("#theme-toggle"),
+  themeIcon: document.querySelector(".theme-icon"),
+  addCityBtn: document.querySelector("#add-city-btn"),
+  addCityDialog: document.querySelector("#add-city-dialog"),
+  cityAddClose: document.querySelector("#add-city-close"),
+  citySearch: document.querySelector("#city-search"),
+  citySelect: document.querySelector("#city-select"),
+  citySuggestions: document.querySelector("#city-suggestions"),
+  cityAddConfirm: document.querySelector("#city-add-confirm"),
+  cityCancel: document.querySelector("#city-cancel"),
+  citiesList: document.querySelector("#cities-list")
 };
 
+// Theme Management
+function initTheme() {
+  const saved = localStorage.getItem("theme") || "dark";
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  const html = document.documentElement;
+  if (theme === "light") {
+    html.classList.remove("dark-mode");
+    html.classList.add("light-mode");
+    el.themeIcon.textContent = "☀️";
+  } else {
+    html.classList.remove("light-mode");
+    html.classList.add("dark-mode");
+    el.themeIcon.textContent = "🌙";
+  }
+  localStorage.setItem("theme", theme);
+}
+
+el.themeToggle.addEventListener("click", () => {
+  const current = localStorage.getItem("theme") || "dark";
+  const next = current === "dark" ? "light" : "dark";
+  applyTheme(next);
+});
+
+// Timezone utilities
 function partsInZone(date, timeZone) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone, year: "numeric", month: "2-digit", day: "2-digit",
@@ -114,47 +160,55 @@ function render(updateInput = true) {
         <span class="clock-time">${data.time}<small>${data.offset}</small></span>
         <span class="clock-date">${data.dateText}</span>
         <span class="card-foot"><span class="work-status ${work.className}">${work.label}</span><span class="day-shift">${dayShiftLabel(state.instant, item.zone, anchor.zone)}</span></span>
-      </button>`;
+      </button>
+    `;
   }).join("");
-  updateUrl();
+  
+  renderAdditionalCities();
 }
 
-function updateUrl() {
-  const url = new URL(location.href);
-  url.searchParams.set("from", state.anchorId);
-  if (state.live) url.searchParams.delete("at");
-  else url.searchParams.set("at", state.instant.toISOString());
-  history.replaceState(null, "", url);
+function renderAdditionalCities() {
+  el.citiesList.innerHTML = state.additionalCities.map((item, index) => {
+    const data = formatZone(state.instant, item);
+    const anchor = ZONES.find(z => z.id === state.anchorId);
+    return `
+      <div class="city-card">
+        <button class="city-card-remove" data-index="${index}" type="button" title="Remove city">✕</button>
+        <span class="city-card-time">${data.time}</span>
+        <span class="city-card-name">${item.city}</span>
+        <span class="city-card-tz">${item.country}</span>
+        <span class="city-card-offset" style="font-size: 0.7rem; color: var(--muted);">${data.offset}</span>
+      </div>
+    `;
+  }).join("");
+  
+  document.querySelectorAll(".city-card-remove").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const idx = parseInt(e.target.dataset.index);
+      state.additionalCities.splice(idx, 1);
+      localStorage.setItem("additionalCities", JSON.stringify(state.additionalCities));
+      render(false);
+    });
+  });
 }
 
 function setPlanned(date) {
-  if (!date || Number.isNaN(date.getTime())) return;
-  state.instant = date;
-  state.live = false;
-  render();
-}
-
-function showToast(message) {
-  el.toast.textContent = message;
-  el.toast.classList.add("show");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => el.toast.classList.remove("show"), 2200);
+  if (date) { state.instant = date; state.live = false; render(); }
 }
 
 function summaryText() {
   const anchor = ZONES.find(z => z.id === state.anchorId);
-  const rows = ZONES.map(z => {
-    const d = formatZone(state.instant, z);
-    return `${z.city}: ${d.time} (${d.dateText}, ${d.offset})`;
-  });
-  return `Time Bridge — starting from ${anchor.city}\n${rows.join("\n")}\n${location.href}`;
+  const times = ZONES.map(z => {
+    const d = formatZone(state.instant, z.zone);
+    return `${z.city}: ${d.time}`;
+  }).join(" · ");
+  return `Time Bridge: ${times}`;
 }
 
-function roundedRect(ctx, x, y, width, height, radius) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, width, height, radius);
-  ctx.fill();
-  ctx.stroke();
+function showToast(msg) {
+  el.toast.textContent = msg;
+  el.toast.classList.add("show");
+  setTimeout(() => el.toast.classList.remove("show"), 3000);
 }
 
 async function makeSnapshot() {
@@ -162,27 +216,19 @@ async function makeSnapshot() {
   canvas.width = 1400;
   canvas.height = 1000;
   const ctx = canvas.getContext("2d");
-  const gradient = ctx.createLinearGradient(0, 0, 1400, 1000);
-  gradient.addColorStop(0, "#080d18");
-  gradient.addColorStop(.55, "#111c31");
-  gradient.addColorStop(1, "#09111e");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 1400, 1000);
-
-  ctx.fillStyle = "#c8f35b";
-  ctx.font = "800 22px system-ui, sans-serif";
-  ctx.letterSpacing = "5px";
-  ctx.fillText("TIME BRIDGE", 80, 78);
+  
+  ctx.fillStyle = "#0f182a";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
   ctx.fillStyle = "#f5f7fb";
-  ctx.font = "700 62px system-ui, sans-serif";
-  ctx.letterSpacing = "-2px";
-  ctx.fillText("One moment. Four cities.", 80, 164);
-  ctx.fillStyle = "#8794ac";
-  ctx.font = "400 24px system-ui, sans-serif";
-  ctx.letterSpacing = "0px";
+  ctx.font = "800 44px system-ui, sans-serif";
+  ctx.fillText("Time Bridge", 80, 70);
+  
   const anchor = ZONES.find(z => z.id === state.anchorId);
-  ctx.fillText(`Starting from ${anchor.city} · ${state.live ? "Live time" : "Planned time"}`, 82, 207);
-
+  ctx.fillStyle = "#98a5bd";
+  ctx.font = "600 24px system-ui, sans-serif";
+  ctx.fillText(`From: ${anchor.city}`, 80, 120);
+  
   ZONES.forEach((z, index) => {
     const col = index % 2;
     const row = Math.floor(index / 2);
@@ -219,6 +265,22 @@ async function makeSnapshot() {
   return new Promise(resolve => canvas.toBlob(resolve, "image/png", 1));
 }
 
+function roundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
 async function openSnapshot() {
   el.capture.disabled = true;
   el.capture.textContent = "Creating…";
@@ -253,6 +315,65 @@ async function shareSnapshot() {
   }
 }
 
+// City Management
+function populateCityDropdown() {
+  el.citySelect.innerHTML = TIMEZONE_DATABASE.map(item => 
+    `<option value="${item.zone}" data-city="${item.city}" data-country="${item.country}">${item.city}, ${item.country}</option>`
+  ).join("");
+}
+
+el.citySearch.addEventListener("input", (e) => {
+  const query = e.target.value.toLowerCase();
+  if (query.length < 1) {
+    el.citySuggestions.classList.remove("active");
+    return;
+  }
+  
+  const filtered = TIMEZONE_DATABASE.filter(item =>
+    item.city.toLowerCase().includes(query) || item.country.toLowerCase().includes(query)
+  ).slice(0, 8);
+  
+  el.citySuggestions.innerHTML = filtered.map(item =>
+    `<div class="city-suggestion-item" data-zone="${item.zone}" data-city="${item.city}" data-country="${item.country}">${item.city}, ${item.country}</div>`
+  ).join("");
+  
+  el.citySuggestions.classList.add("active");
+  
+  document.querySelectorAll(".city-suggestion-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const zone = item.dataset.zone;
+      const city = item.dataset.city;
+      const country = item.dataset.country;
+      el.citySearch.value = `${city}, ${country}`;
+      el.citySuggestions.classList.remove("active");
+    });
+  });
+});
+
+el.cityAddConfirm.addEventListener("click", () => {
+  const zone = el.citySearch.value || el.citySelect.value;
+  const selected = TIMEZONE_DATABASE.find(item => item.zone === zone || item.city === el.citySearch.value.split(",")[0]?.trim());
+  
+  if (selected && !state.additionalCities.find(c => c.zone === selected.zone)) {
+    state.additionalCities.push(selected);
+    localStorage.setItem("additionalCities", JSON.stringify(state.additionalCities));
+    render(false);
+    el.citySearch.value = "";
+    el.citySuggestions.classList.remove("active");
+    el.addCityDialog.close();
+    showToast(`Added ${selected.city}!`);
+  }
+});
+
+el.addCityBtn.addEventListener("click", () => {
+  el.citySearch.value = "";
+  el.citySuggestions.classList.remove("active");
+  el.addCityDialog.showModal();
+});
+
+el.cityAddClose.addEventListener("click", () => el.addCityDialog.close());
+el.cityCancel.addEventListener("click", () => el.addCityDialog.close());
+
 function loadStateFromUrl() {
   const params = new URLSearchParams(location.search);
   const from = params.get("from");
@@ -264,8 +385,21 @@ function loadStateFromUrl() {
   }
 }
 
+function loadAdditionalCities() {
+  try {
+    const saved = localStorage.getItem("additionalCities");
+    if (saved) state.additionalCities = JSON.parse(saved);
+  } catch (e) {
+    state.additionalCities = [];
+  }
+}
+
+// Initialize
+initTheme();
 ZONES.forEach(z => el.anchor.add(new Option(`${z.city}, ${z.country}`, z.id)));
+populateCityDropdown();
 loadStateFromUrl();
+loadAdditionalCities();
 render();
 
 el.anchor.addEventListener("change", () => { state.anchorId = el.anchor.value; render(); });
@@ -302,6 +436,7 @@ el.grid.addEventListener("click", event => {
   render();
   document.querySelector(".control-panel").scrollIntoView({ behavior: "smooth", block: "center" });
 });
+
 el.now.addEventListener("click", () => { state.live = true; state.instant = new Date(); render(); });
 el.minus.addEventListener("click", () => setPlanned(new Date(state.instant.getTime() - 3600000)));
 el.plus.addEventListener("click", () => setPlanned(new Date(state.instant.getTime() + 3600000)));

@@ -19,7 +19,12 @@
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span>TIME BRIDGE</span>
       </a>
-      <div class="live-pill" id="live-pill"><span></span><span id="mode-label">Live now</span></div>
+      <div class="topbar-controls">
+        <button id="theme-toggle" class="theme-toggle" type="button" title="Toggle dark mode" aria-label="Toggle theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="live-pill" id="live-pill"><span></span><span id="mode-label">Live now</span></div>
+      </div>
     </header>
 
     <section class="hero">
@@ -65,6 +70,16 @@
       </div>
     </section>
 
+    <section class="additional-cities-section">
+      <div class="cities-manager">
+        <div class="manager-header">
+          <h3>Additional Cities</h3>
+          <button id="add-city-btn" class="add-city-button" type="button" title="Add custom city">+ Add City</button>
+        </div>
+        <div class="cities-list" id="cities-list"></div>
+      </div>
+    </section>
+
     <div class="status-row">
       <p id="moment-summary">One shared moment across four time zones</p>
       <p>Tap any city to make it the starting point</p>
@@ -104,7 +119,25 @@
     </div>
   </dialog>
 
+  <dialog id="add-city-dialog">
+    <div class="dialog-card">
+      <button class="dialog-close" id="add-city-close" type="button" aria-label="Close">×</button>
+      <p class="eyebrow">ADD CUSTOM CITY</p>
+      <h2>Select a city and timezone</h2>
+      <div class="add-city-form">
+        <input id="city-search" type="text" placeholder="Search cities..." class="city-search-input" />
+        <select id="city-select" class="city-select-dropdown"></select>
+        <div id="city-suggestions" class="city-suggestions"></div>
+      </div>
+      <div class="dialog-actions">
+        <button class="secondary-button" id="city-cancel" type="button">Cancel</button>
+        <button class="primary-button" id="city-add-confirm" type="button">Add City</button>
+      </div>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="timezones.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
