@@ -12,7 +12,8 @@ const state = {
   live: true,
   snapshotBlob: null,
   snapshotUrl: null,
-  additionalCities: []
+  additionalCities: [],
+  favoriteCities: []
 };
 
 const el = {
@@ -131,6 +132,28 @@ function workLabel(hour) {
   return { label: "Outside hours", className: "" };
 }
 
+function checkWorkingHours(date) {
+  const allCities = [...ZONES, ...state.additionalCities];
+  const workingCities = [];
+  const outsideCities = [];
+  
+  allCities.forEach(city => {
+    const hour = Number(partsInZone(date, city.zone).hour);
+    if (hour >= 9 && hour < 17) {
+      workingCities.push(city.city);
+    } else {
+      outsideCities.push(city.city);
+    }
+  });
+  
+  return {
+    workingCities,
+    outsideCities,
+    allInWorking: outsideCities.length === 0 && workingCities.length === allCities.length,
+    noneInWorking: workingCities.length === 0
+  };
+}
+
 function render(updateInput = true) {
   const anchor = ZONES.find(z => z.id === state.anchorId);
   if (updateInput && document.activeElement !== el.input) el.input.value = localInputValue(state.instant, anchor.zone);
@@ -146,10 +169,20 @@ function render(updateInput = true) {
     el.minutesDisplay.textContent = String(Math.floor(minute / 5) * 5).padStart(2, "0");
   }
   
+  const workingStatus = checkWorkingHours(state.instant);
+  let workingBadge = "";
+  if (workingStatus.allInWorking) {
+    workingBadge = '<span class="working-badge good">✓ Perfect time for all!</span>';
+  } else if (workingStatus.noneInWorking) {
+    workingBadge = '<span class="working-badge bad">✗ Outside hours for everyone</span>';
+  } else {
+    workingBadge = `<span class="working-badge warning">⚠ ${workingStatus.outsideCities.length} city(ies) outside hours</span>`;
+  }
+  
   el.anchor.value = state.anchorId;
   el.livePill.classList.toggle("planned", !state.live);
   el.modeLabel.textContent = state.live ? "Live now" : "Planning mode";
-  el.summary.textContent = state.live ? "Live local times across four zones" : `Anchored to ${anchor.city} local time`;
+  el.summary.innerHTML = (state.live ? "Live local times across four zones" : `Anchored to ${anchor.city} local time`) + workingBadge;
 
   el.grid.innerHTML = ZONES.map(item => {
     const data = formatZone(state.instant, item);
@@ -173,12 +206,23 @@ function renderAdditionalCities() {
     return;
   }
   
-  el.citiesList.innerHTML = state.additionalCities.map((item, index) => {
+  // Sort favorites to top
+  const sorted = [...state.additionalCities].sort((a, b) => {
+    const aFav = state.favoriteCities.includes(a.zone);
+    const bFav = state.favoriteCities.includes(b.zone);
+    return bFav - aFav;
+  });
+  
+  el.citiesList.innerHTML = sorted.map((item, index) => {
     const data = formatZone(state.instant, item);
-    const anchor = ZONES.find(z => z.id === state.anchorId);
+    const isFavorite = state.favoriteCities.includes(item.zone);
+    const originalIndex = state.additionalCities.findIndex(c => c.zone === item.zone);
     return `
-      <div class="city-card">
-        <button class="city-card-remove" data-index="${index}" type="button" title="Remove city">✕</button>
+      <div class="city-card ${isFavorite ? 'favorite' : ''}">
+        <button class="city-card-favorite" data-zone="${item.zone}" type="button" title="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">
+          ${isFavorite ? '⭐' : '☆'}
+        </button>
+        <button class="city-card-remove" data-index="${originalIndex}" type="button" title="Remove city">✕</button>
         <span class="city-card-time">${data.time}</span>
         <span class="city-card-name">${item.city}</span>
         <span class="city-card-tz">${item.country}</span>
@@ -187,11 +231,29 @@ function renderAdditionalCities() {
     `;
   }).join("");
   
+  // Favorite button handlers
+  document.querySelectorAll(".city-card-favorite").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const zone = e.target.dataset.zone;
+      if (state.favoriteCities.includes(zone)) {
+        state.favoriteCities = state.favoriteCities.filter(z => z !== zone);
+      } else {
+        state.favoriteCities.push(zone);
+      }
+      localStorage.setItem("favoriteCities", JSON.stringify(state.favoriteCities));
+      render(false);
+    });
+  });
+  
+  // Remove button handlers
   document.querySelectorAll(".city-card-remove").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const idx = parseInt(e.target.dataset.index);
+      const removedZone = state.additionalCities[idx].zone;
       state.additionalCities.splice(idx, 1);
+      state.favoriteCities = state.favoriteCities.filter(z => z !== removedZone);
       localStorage.setItem("additionalCities", JSON.stringify(state.additionalCities));
+      localStorage.setItem("favoriteCities", JSON.stringify(state.favoriteCities));
       render(false);
     });
   });
@@ -420,12 +482,22 @@ function loadAdditionalCities() {
   }
 }
 
+function loadFavoriteCities() {
+  try {
+    const saved = localStorage.getItem("favoriteCities");
+    if (saved) state.favoriteCities = JSON.parse(saved);
+  } catch (e) {
+    state.favoriteCities = [];
+  }
+}
+
 // Initialize
 initTheme();
 ZONES.forEach(z => el.anchor.add(new Option(`${z.city}, ${z.country}`, z.id)));
 populateCityDropdown();
 loadStateFromUrl();
 loadAdditionalCities();
+loadFavoriteCities();
 render();
 renderAdditionalCities();  // Ensure cities render on load
 

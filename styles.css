@@ -144,6 +144,11 @@ h1 em { color: transparent; -webkit-text-stroke: 1.5px rgba(245,247,251,.64); fo
 .status-row { display: flex; justify-content: space-between; color: #6f7d96; font-size: .72rem; margin: 18px 3px 12px; }
 .status-row p { margin: 0; }
 
+.working-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-left: 12px; letter-spacing: 0.05em; }
+.working-badge.good { background: rgba(200,243,91,.2); color: #a8c91a; }
+.working-badge.warning { background: rgba(255,193,7,.2); color: #ffc107; }
+.working-badge.bad { background: rgba(255,107,107,.2); color: #ff6b6b; }
+
 .clock-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; background: rgba(10,16,29,.62); box-shadow: 0 26px 80px rgba(0,0,0,.2); }
 .clock-card { position: relative; min-height: 298px; padding: 25px 23px 22px; cursor: pointer; border: 0; border-right: 1px solid var(--line); background: transparent; text-align: left; overflow: hidden; transition: background .2s ease; }
 .clock-card:last-child { border-right: 0; }
@@ -171,8 +176,12 @@ h1 em { color: transparent; -webkit-text-stroke: 1.5px rgba(245,247,251,.64); fo
 .add-city-button:hover { background: rgba(200,243,91,.2); transform: translateY(-1px); }
 .cities-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; min-height: 60px; }
 .city-card { position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(135deg, rgba(200,243,91,.08), rgba(255,255,255,.02)); text-align: center; transition: all 0.2s; }
+.city-card.favorite { background: linear-gradient(135deg, rgba(200,243,91,.15), rgba(200,243,91,.08)); border-color: var(--lime); }
 .city-card:hover { background: linear-gradient(135deg, rgba(200,243,91,.15), rgba(255,255,255,.08)); border-color: var(--lime); }
-.city-card-remove { position: absolute; top: 6px; right: 8px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(255,100,100,.2); color: #ff6464; font-size: 0.9rem; cursor: pointer; opacity: 0; transition: opacity 0.2s; }
+.city-card-favorite { position: absolute; top: 6px; left: 8px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: transparent; color: #ffc107; font-size: 1rem; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; padding: 0; }
+.city-card:hover .city-card-favorite { opacity: 1; }
+.city-card-favorite:hover { opacity: 1; }
+.city-card-remove { position: absolute; top: 6px; right: 8px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(255,100,100,.2); color: #ff6464; font-size: 0.9rem; cursor: pointer; opacity: 0; transition: opacity 0.2s; padding: 0; }
 .city-card:hover .city-card-remove { opacity: 1; }
 .city-card-remove:hover { background: rgba(255,100,100,.4); }
 .city-card-time { display: block; font-weight: 700; font-size: 1.4rem; color: var(--ink); margin-bottom: 6px; }
