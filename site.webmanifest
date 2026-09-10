@@ -1,0 +1,9 @@
+{
+  "name": "Time Bridge",
+  "short_name": "Time Bridge",
+  "description": "Compare one moment across Stockholm, Ottawa, Dhaka and Kuala Lumpur.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080d18",
+  "theme_color": "#0a1020"
+}

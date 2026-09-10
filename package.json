@@ -1,0 +1,11 @@
+{
+  "name": "time-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shareable four-city timezone converter for the web.",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check app.js"
+  },
+  "engines": { "node": ">=20" }
+}

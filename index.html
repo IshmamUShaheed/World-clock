@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a1020" />
+  <meta name="description" content="Compare Stockholm, Ottawa, Dhaka and Kuala Lumpur at a glance." />
+  <title>Time Bridge — Four-city time converter</title>
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Time Bridge home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>TIME BRIDGE</span>
+      </a>
+      <div class="live-pill" id="live-pill"><span></span><span id="mode-label">Live now</span></div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">FOUR CITIES · ONE MOMENT</p>
+        <h1>When works<br><em>for everyone?</em></h1>
+      </div>
+      <p class="intro">Choose a city and set its local time. Every other clock moves to the same moment—daylight-saving changes included.</p>
+    </section>
+
+    <section class="control-panel" aria-label="Time controls">
+      <label class="field city-field">
+        <span>STARTING FROM</span>
+        <select id="anchor-select" aria-label="Starting city"></select>
+      </label>
+      <div class="divider" aria-hidden="true"></div>
+      <label class="field time-field">
+        <span>LOCAL DATE &amp; TIME</span>
+        <input id="time-input" type="datetime-local" step="60" aria-label="Local date and time" />
+      </label>
+      <div class="quick-actions" aria-label="Quick time controls">
+        <button class="quiet-button" id="minus-hour" type="button" title="One hour earlier">−1h</button>
+        <button class="now-button" id="now-button" type="button"><span>●</span> Now</button>
+        <button class="quiet-button" id="plus-hour" type="button" title="One hour later">+1h</button>
+      </div>
+    </section>
+
+    <div class="status-row">
+      <p id="moment-summary">One shared moment across four time zones</p>
+      <p>Tap any city to make it the starting point</p>
+    </div>
+
+    <section class="clock-grid" id="clock-grid" aria-live="polite"></section>
+
+    <section class="share-bar">
+      <div>
+        <p class="share-kicker">READY FOR THE GROUP?</p>
+        <h2>Turn this moment into a message.</h2>
+      </div>
+      <div class="share-actions">
+        <button class="secondary-button" id="copy-button" type="button">Copy app link</button>
+        <button class="primary-button" id="capture-button" type="button">
+          <span aria-hidden="true">↗</span> Screenshot &amp; share
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      <span>Stockholm</span><i></i><span>Ottawa</span><i></i><span>Dhaka</span><i></i><span>Kuala Lumpur</span>
+    </footer>
+  </main>
+
+  <dialog id="share-dialog">
+    <div class="dialog-card">
+      <button class="dialog-close" id="dialog-close" type="button" aria-label="Close">×</button>
+      <p class="eyebrow">SHAREABLE SNAPSHOT</p>
+      <h2>Your four-city moment</h2>
+      <img id="snapshot-preview" alt="A snapshot showing the selected time in four cities" />
+      <div class="dialog-actions">
+        <button class="secondary-button" id="download-button" type="button">Download PNG</button>
+        <button class="primary-button" id="share-button" type="button">Share image</button>
+      </div>
+      <p class="dialog-note" id="share-note">On supported phones, choose Messenger and then your group from the share sheet.</p>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
